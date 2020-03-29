@@ -31,7 +31,7 @@ parser.add_argument('--version', action='version', version='0.0.1')
 logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.DEBUG)
 
 
-def parse_section(inF, cur_time, label):
+def parse_section(inF, cur_time, label, data_type):
     regex = re.compile(' +')
     vals = []
     for line in inF:
@@ -43,25 +43,23 @@ def parse_section(inF, cur_time, label):
         if line[1].rstrip('*') == '':
             line = [line[0], line[2], line[3]]
         line[2] = line[2].lstrip('(').rstrip('%)')
-        line = [label, cur_time] + line
+        line = [data_type, label, cur_time] + line
         vals.append([str(x) for x in line])
     return vals
 
 def write_to_db(vals, db_c):
     """Writing to sqlite3 db
     """
-    db_c.executemany('INSERT INTO disk_usage VALUES (?,?,?,?,?)', vals)    
-    #db_c.execute("select * from disk_usage")
-    #print(db_c.fetchall())
+    db_c.executemany('INSERT INTO disk_usage VALUES (?,?,?,?,?,?)', vals)    
     
 def main(args):
-    # checking input
+    # data type
     if args.inodes:
         which_section = ['project inode usage (unit:', 'inode usage (unit:']
-        units = '1000_files'
+        data_type = 'inodes'
     else:
         which_section = ['project disk usage (unit:', 'disk usage (unit:']
-        units = 'gigabytes'
+        data_type = 'disk usage'
     # sql connection
     conn = sqlite3.connect(args.db_file)
     c = conn.cursor()
@@ -78,7 +76,7 @@ def main(args):
             for line in inF:
                 line = line.rstrip()
                 if any([line.startswith(x) for x in which_section]):
-                    vals = parse_section(inF, cur_time, label)
+                    vals = parse_section(inF, cur_time, label, data_type)
                     if len(vals) > 0:
                         write_to_db(vals, c)
     conn.commit()
