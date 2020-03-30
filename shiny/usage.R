@@ -11,6 +11,8 @@ disk_usage_read = function(conn, table='disk_usage',
       mutate(time = sapply(time, format_time))
   if(data_type == 'inodes'){
     df = df %>% rename('million_files' = terabytes)
+  } else {
+    df = df %>% mutate(terabytes = terabytes / 1000)   # wrong unit in the database
   }
   return(df)
 }
