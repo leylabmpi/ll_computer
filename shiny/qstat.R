@@ -37,7 +37,7 @@ qstat_plot = function(df, input){
                               TRUE ~ Metric)) %>%
     ggplot(aes(time, Value, group=uname, color=uname)) +
     geom_line(alpha=0.25) +
-    geom_point(alpha=0.5) +
+    geom_point(alpha=0.5, size=0.7) +
     scale_color_discrete('Username') +
     facet_grid(Metric ~ ., scales='free_y') +
     theme_bw() +
