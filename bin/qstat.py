@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 from __future__ import print_function
 import sys,os
+import time
 import argparse
 import logging
 import datetime
@@ -86,8 +87,28 @@ def qstat_users(users, args):
             vals.append(row)
 
     if len(vals) > 0:
-        write_to_db(vals, c)
-    conn.commit()
+        tries = 0
+        while(1):
+            if tries > 15:
+                logging.warning('Exceeded 15 tries. Giving up')
+                break
+            try:
+                write_to_db(vals, c)
+                break
+            except sqlite3.OperationalError:
+                time.sleep(3)
+                continue
+    tries = 0
+    while(1):
+        tries += 1
+        if tries > 5:
+            logging.warning('Exceeded 5 tries to commit changes. Giving up')
+        break
+        try:
+            conn.commit()
+        except (IOError, sqlite3.OperationalError) as e:
+            time.sleep(2)
+            continue
     conn.close()
 
 def main(args):

@@ -50,7 +50,18 @@ def parse_section(inF, cur_time, label, data_type):
 def write_to_db(vals, db_c):
     """Writing to sqlite3 db
     """
-    db_c.executemany('INSERT INTO disk_usage VALUES (?,?,?,?,?,?)', vals)    
+        tries = 0
+    while(1):
+        tries += 1
+        if tries > 15:
+            logging.warning('Exceeded 15 tries to write to db. Giving up')
+            break
+        try:
+            db_c.executemany('INSERT INTO disk_usage VALUES (?,?,?,?,?,?)', vals)    
+            break
+        except sqlite3.OperationalError:
+            time.sleep(3)
+            continue
     
 def main(args):
     # data type

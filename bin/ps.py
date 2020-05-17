@@ -2,6 +2,7 @@
 from __future__ import print_function
 import sys,os
 import re
+import time
 import argparse
 import logging
 import datetime
@@ -28,7 +29,18 @@ logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.DEBUG)
 def write_to_db(vals, db_c):
     """Writing to sqlite3 db
     """
-    db_c.executemany('INSERT INTO ps VALUES (?,?,?,?,?,?,?,?)', vals)    
+    tries = 0
+    while(1):
+        tries += 1
+        if tries > 15:
+            logging.warning('Exceeded 15 tries to write to db. Giving up')
+            break
+        try:
+            db_c.executemany('INSERT INTO ps VALUES (?,?,?,?,?,?,?,?)', vals)
+            break
+        except sqlite3.OperationalError:
+            time.sleep(3)
+            continue
 
 def main(args):
     # compiling regex's
