@@ -49,11 +49,7 @@ def write_to_db(vals, db_c):
     """
     db_c.executemany('INSERT INTO qstat VALUES (?,?,?,?,?,?,?,?,?)', vals)
 
-def qstat_users(users, args):
-    # sql connection
-    conn = sqlite3.connect(args.db_file)
-    c = conn.cursor()
-    
+def qstat_users(users, args):    
     # qstat call
     cmd = '"{}"'.format(','.join(users))
     cmd = ['qstat', '-ext', '-xml', '-u', cmd]
@@ -85,12 +81,17 @@ def qstat_users(users, args):
                 except KeyError:
                     row.append(None)
             vals.append(row)
-
+            
     if len(vals) > 0:
+        # sql connection
+        conn = sqlite3.connect(args.db_file)
+        c = conn.cursor()
+        # writing to db
         tries = 0
+        maxtries = 10
         while(1):
-            if tries > 15:
-                logging.warning('Exceeded 15 tries. Giving up')
+            if tries > maxtries:
+                logging.warning('Exceeded {} tries. Giving up'.format(maxtries))
                 break
             try:
                 write_to_db(vals, c)
@@ -98,18 +99,9 @@ def qstat_users(users, args):
             except sqlite3.OperationalError:
                 time.sleep(3)
                 continue
-    tries = 0
-    while(1):
-        tries += 1
-        if tries > 5:
-            logging.warning('Exceeded 5 tries to commit changes. Giving up')
-        break
-        try:
-            conn.commit()
-        except (IOError, sqlite3.OperationalError) as e:
-            time.sleep(2)
-            continue
-    conn.close()
+        # clean up
+        conn.commit()
+        conn.close()
 
 def main(args):
     users = get_all_users(args.group)

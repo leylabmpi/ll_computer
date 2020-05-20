@@ -32,52 +32,46 @@ logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.DEBUG)
 def write_to_db(vals, db_c):
     """Writing to sqlite3 db
     """
-    db_c.executemany('INSERT INTO server_load VALUES (?,?,?)', vals)    
+    tries = 0
+    maxtries = 3
+    while(1):
+        tries += 1
+        if tries > maxtries:
+            msg = 'Exceeded {} tries to write to db. Giving up'
+            logging.warning(msg.format(maxtries))
+            break
+        try:
+            db_c.executemany('INSERT INTO server_load VALUES (?,?,?)', vals)    
+            break
+        except sqlite3.OperationalError:
+            time.sleep(1)
+            continue
 
-def read_and_write(infile, label, c):
+def read_and_write(infile, label, db_file):
+    # sql connection
+    conn = sqlite3.connect(db_file)
+    c = conn.cursor()
+    # parsing file and writing to database
     cur_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     with open(infile) as inF:
         for line in inF:
             line = line.rstrip()
             if line != '':
                 write_to_db([[label, cur_time, line]], c)
+    # db connection close
+    conn.commit()
+    conn.close()
     
 def main(args):
-    # sql connection
-    conn = sqlite3.connect(args.db_file)
-    c = conn.cursor()
         
     # parsing input and writing database
     in_files = args.in_files.split(',')
     labels = args.label.split(',')
     if len(in_files) != len(labels):
         raise ValueError('The number of labels doesn\'t match the number of input files')
-
-    tries = 0
+    ## per-file parsing and writing to db
     for in_file,label in zip(in_files, labels):
-        while(1):
-            tries += 1
-            if tries > 15:
-                logging.warning('Exceeded 15 tries. Giving up')
-                break
-            try:
-                read_and_write(in_file, label, c)
-                break
-            except (IOError, sqlite3.OperationalError) as e:
-                time.sleep(3)
-                continue
-    tries = 0
-    while(1):
-        tries += 1
-        if tries > 5:
-            logging.warning('Exceeded 5 tries to commit changes. Giving up')
-        break
-        try:
-            conn.commit()
-        except (IOError, sqlite3.OperationalError) as e:
-            time.sleep(2)
-            continue
-    conn.close()
+        read_and_write(in_file, label, args.db_file)
             
 if __name__ == '__main__':
     args = parser.parse_args()

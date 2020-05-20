@@ -26,31 +26,36 @@ parser.add_argument('--version', action='version', version='0.0.1')
 logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.DEBUG)
 
 
-def write_to_db(vals, db_c):
+def write_to_db(vals, db_file):
     """Writing to sqlite3 db
     """
+    # sql connection
+    conn = sqlite3.connect(db_file, timeout=2)
+    c = conn.cursor()
+    # writing to db
     tries = 0
+    maxtries = 3
     while(1):
         tries += 1
-        if tries > 15:
-            logging.warning('Exceeded 15 tries to write to db. Giving up')
+        if tries > maxtries:
+            msg = 'Exceeded {} tries to write to db. Giving up'
+            logging.warning(msg.format(maxtries))
             break
         try:
-            db_c.executemany('INSERT INTO ps VALUES (?,?,?,?,?,?,?,?)', vals)
+            c.executemany('INSERT INTO ps VALUES (?,?,?,?,?,?,?,?)', vals)
             break
         except sqlite3.OperationalError:
-            time.sleep(3)
+            time.sleep(0.5)
             continue
+    # clean-up
+    conn.commit()
+    conn.close()
 
 def main(args):
     # compiling regex's
     regex = re.compile(r'^([^ ]+) +([^ ]+) +([^ ]+) +([^ ]+) +([^ ]+) +([^ ]+) +(.+)')
     regex2 = re.compile(r'\t')
 
-    # sql connection
-    conn = sqlite3.connect(args.db_file)
-    c = conn.cursor()
-    
     # getting hostname
     hostname = gethostname()
     
@@ -58,7 +63,7 @@ def main(args):
     cmd = ['ps', '--no-headers', '-axww', '-o' 'uname:50,ppid,pid,etime,%cpu,%mem,args']
     p = Popen(cmd, stdout=PIPE)
     ret, err = p.communicate()
-
+    
     # parsing output
     cur_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     vals = []
@@ -73,10 +78,9 @@ def main(args):
                 regex.sub(r'\6', line)] 
         if line[1] != '':
             vals.append(line)
+    # writing to database
     if len(vals) > 0:
-        write_to_db(vals, c)
-    conn.commit()
-    conn.close()
+        write_to_db(vals, args.db_file)
     
 if __name__ == '__main__':
     args = parser.parse_args()

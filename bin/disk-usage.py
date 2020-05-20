@@ -2,6 +2,7 @@
 from __future__ import print_function
 import sys,os
 import re
+import time
 import argparse
 import logging
 import datetime
@@ -50,17 +51,19 @@ def parse_section(inF, cur_time, label, data_type):
 def write_to_db(vals, db_c):
     """Writing to sqlite3 db
     """
-        tries = 0
+    tries = 0
+    maxtries = 3
     while(1):
         tries += 1
-        if tries > 15:
-            logging.warning('Exceeded 15 tries to write to db. Giving up')
+        if tries > maxtries:
+            msg = 'Exceeded {} tries to write to db. Giving up'
+            logging.warning(msg.format(maxtries))
             break
         try:
             db_c.executemany('INSERT INTO disk_usage VALUES (?,?,?,?,?,?)', vals)    
             break
         except sqlite3.OperationalError:
-            time.sleep(3)
+            time.sleep(0.5)
             continue
     
 def main(args):
@@ -71,9 +74,6 @@ def main(args):
     else:
         which_section = ['project disk usage (unit:', 'disk usage (unit:']
         data_type = 'disk usage'
-    # sql connection
-    conn = sqlite3.connect(args.db_file)
-    c = conn.cursor()
         
     # parsing input and writing database
     usage_files = args.usage_files.split(',')
@@ -83,6 +83,10 @@ def main(args):
     
     for usage_file,label in zip(usage_files, labels):
         cur_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        # sql connection
+        conn = sqlite3.connect(args.db_file, timeout=2)
+        c = conn.cursor()
+        # parsing file and writing to database
         with open(usage_file) as inF:
             for line in inF:
                 line = line.rstrip()
@@ -90,8 +94,9 @@ def main(args):
                     vals = parse_section(inF, cur_time, label, data_type)
                     if len(vals) > 0:
                         write_to_db(vals, c)
-    conn.commit()
-    conn.close()
+        # closing 
+        conn.commit()
+        conn.close()
     
 if __name__ == '__main__':
     args = parser.parse_args()
