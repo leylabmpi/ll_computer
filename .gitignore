@@ -4,3 +4,4 @@
 packrat/
 .Rhistory
 .Rprofile
+packrat/lib*/

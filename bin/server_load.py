@@ -51,13 +51,27 @@ def read_and_write(infile, label, db_file):
     # sql connection
     conn = sqlite3.connect(db_file)
     c = conn.cursor()
-    # parsing file and writing to database
-    cur_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    with open(infile) as inF:
-        for line in inF:
-            line = line.rstrip()
-            if line != '':
-                write_to_db([[label, cur_time, line]], c)
+    # parsing file and writing to database    
+    tries = 0
+    maxtries = 3
+    while 1:
+        tries += 1
+        if tries > maxtries:
+            msg = 'Exceeded {} tries to open {}. Giving up\n'
+            sys.stderr.write(msg.format(maxtries, infile))
+            break
+        try:
+            cur_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            with open(infile) as inF:
+                for line in inF:
+                    line = line.rstrip()
+                    if line != '':
+                        write_to_db([[label, cur_time, line]], c)
+            break
+        except IOError:
+            time.sleep(0.5)
+            continue
+    
     # db connection close
     conn.commit()
     conn.close()
