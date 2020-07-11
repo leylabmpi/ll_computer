@@ -2,13 +2,14 @@ source('utils.R')
 
 #' Reading in qstat log
 qstat_read = function(conn, table='qstat', time_val=4, units='hours'){
-  X = median(1:(time_val-3))
+  X = ifelse(time_val-3 < 1, 1, time_val-3)
+  Y = median(1:X)
   sql = sql_recent(table=table, time_val=time_val, units=units)
   df = DBI::dbGetQuery(conn, sql) %>%
     rename('uname' = jb_owner) %>%
     mutate(time = format_time(time),
            time_rank = time %>% as.factor %>% as.numeric) %>%
-    filter(time_rank %% (time_val - 3) %in% c(0,X)) %>%
+    filter(time_rank %% X %in% c(0,Y)) %>%
     select(-time_rank) %>%
     group_by(time, uname) %>%
     summarize(n_jobs = n(),

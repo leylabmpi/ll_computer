@@ -2,9 +2,10 @@ source('utils.R')
 
 #' Reading in server load log 
 server_load_read = function(conn, table='server_load', time_val=4, units='hours'){
-  X1 = round(quantile(1:(time_val-3), 0.25),0)
-  X2 = median(1:(time_val-3))
-  X3 = round(quantile(1:(time_val-3), 0.75),0)
+  X = ifelse(time_val-3 < 1, 1, time_val-3)
+  X1 = round(quantile(1:X, 0.25),0)
+  X2 = median(1:X)
+  X3 = round(quantile(1:X, 0.75),0)
   sql = sql_recent(table=table, time_val=time_val, units=units)
   df = DBI::dbGetQuery(conn, sql) %>%
       mutate(time = as.POSIXct(time, tz=Sys.timezone()), # strptime(time, "%Y-%m-%d %H:%M:%S"),
@@ -12,7 +13,7 @@ server_load_read = function(conn, table='server_load', time_val=4, units='hours'
       filter(!is.na(time),
              !is.na(io_load)) %>%
       mutate(time_rank = time %>% as.factor %>% as.numeric) %>%
-      filter(time_rank %% (time_val - 3) %in% c(0,X1,X2,X3)) %>%
+      filter(time_rank %% X %in% c(0,X1,X2,X3)) %>%
       select(-time_rank) 
   return(df)
 }
