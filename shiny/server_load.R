@@ -7,6 +7,7 @@ server_load_read = function(conn, table='server_load', time_val=4, units='hours'
   X2 = median(1:X)
   X3 = round(quantile(1:X, 0.75),0)
   sql = sql_recent(table=table, time_val=time_val, units=units)
+  print(sql)
   df = DBI::dbGetQuery(conn, sql) %>%
       mutate(time = as.POSIXct(time, tz=Sys.timezone()), # strptime(time, "%Y-%m-%d %H:%M:%S"),
              io_load = as.numeric(io_load)) %>%

@@ -1,9 +1,10 @@
 #' Reading in disk-usage log
 #' data_type = c('disk usage', 'inodes')
 #' disk_usage = c('tmp-global', 'tmp-global2', 'abt3-projects', 'abt3-home', 'abt3-scratch')
-disk_usage_read = function(conn, table='disk_usage', 
-                           data_type='disk usage', filesystem='abt3-projects', 
+disk_usage_read = function(conn, table='disk_usage', data_type='disk usage', 
+                           filesystem='abt3-projects', project_sizes=NULL,
                            time_val=2, units='days'){
+  # getting disk usage info
   sql = sql_recent(table=table, time_val=time_val, units=units, 
                    data_type=data_type, filesystem=filesystem)
   df = DBI::dbGetQuery(conn, sql) %>%
@@ -13,6 +14,22 @@ disk_usage_read = function(conn, table='disk_usage',
     df = df %>% rename('million_files' = terabytes)
   } else {
     df = df %>% mutate(terabytes = terabytes / 1000)   # wrong unit in the database
+  }
+  # getting project sizes if not null
+  if (!is.null(project_sizes)){
+    sql = sql_recent(table=project_sizes, time_val=time_val, units=units, 
+                     data_type=NULL, filesystem=NULL)
+    df_sizes = DBI::dbGetQuery(conn, sql) %>%
+      dplyr::select(-time) %>%
+      distinct(directory, .keep_all=TRUE) %>%
+      rename('max_size_Tb' = terabytes) 
+    df = df %>%
+        inner_join(df_sizes, c('directory')) %>%
+        mutate(perc_of_max = terabytes / max_size_Tb * 100) %>%
+        dplyr::select(-max_size_Tb)
+  } else {
+    df = df %>%
+      mutate(perc_of_max = NA)
   }
   return(df)
 }
@@ -27,20 +44,27 @@ disk_usage_plot = function(df, input){
     mutate(percent = percent %>% as.Num,
            directory = directory %>% as.character,
            directory = reorder(directory, percent)) %>%
-    gather(unit, usage, -time, -directory) %>%
+    gather(unit, usage, -time, -directory, -perc_of_max) %>%
     mutate(unit = case_when(unit == 'million_files' ~ 'Millions of files',
                             unit == 'terabytes' ~ 'Terabytes',
                             unit == 'percent' ~ '% of total',
                             TRUE ~ unit), 
            unit = factor(unit, levels=levs)) %>%
     ggplot(aes(directory, usage)) +
-    geom_bar(stat='identity') +
     coord_flip() +
     facet_grid(. ~ unit, scales='free_x') +
     theme_bw() +
     theme(
       axis.title.y = element_blank()
     )
+  if(all(is.na(df$perc_of_max))){
+    p = p + geom_bar(stat='identity')
+  } else {
+    cols = c('black', 'darkblue', 'purple', 'red', 'orange')
+    p = p + 
+      geom_bar(stat='identity', aes(fill=perc_of_max)) +
+      scale_fill_gradientn('% of max', colors=cols)
+  }
   return(p)
 }
 

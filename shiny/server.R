@@ -4,6 +4,7 @@ library(tidyr)
 library(ggplot2)
 library(dbplyr)
 library(plotly)
+library(DBI)
 
 
 source('utils.R')
@@ -15,10 +16,15 @@ source('usage.R')
 
 
 shinyServer(function(input, output, session){
+  cancel.onSessionEnded <- session$onSessionEnded(function() {
+    dbDisconnect(conn)
+    cat("Connection to database terminated\n")
+  })
+  
   # database connect
   db_file = '/ebio/abt3_projects/databases_no-backup/ll_computer/ll_computer.db'
-  conn = DBI::dbConnect(RSQLite::SQLite(),
-                        dbname = db_file)
+  conn = dbConnect(RSQLite::SQLite(),
+                   dbname = db_file)
   
   # setting timers for reload data
   second_timer = reactiveTimer(intervalMs = 1000, session = session)
@@ -63,6 +69,7 @@ shinyServer(function(input, output, session){
     output$du_plot_abt3_projects <- renderPlotly({
       disk_usage_plot(disk_usage_read(conn, data_type='disk usage', 
                                       filesystem='abt3-projects',
+                                      project_sizes='project_sizes',
                                       time_val=2, units='days'), 
                       input)
     })
@@ -85,7 +92,8 @@ shinyServer(function(input, output, session){
                       input)
     })
     output$du_plot_abt3_home <- renderPlotly({
-      disk_usage_plot(disk_usage_read(conn, data_type='disk usage', filesystem='abt3-home',
+      disk_usage_plot(disk_usage_read(conn, data_type='disk usage', 
+                                      filesystem='abt3-home',
                                       time_val=2, units='days'), 
                       input)
     })

@@ -5,3 +5,4 @@ packrat/
 .Rhistory
 .Rprofile
 packrat/lib*/
+tmp/
