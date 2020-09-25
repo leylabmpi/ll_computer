@@ -101,6 +101,7 @@ shinyServer(function(input, output, session){
     output$inodes_plot_abt3_projects <- renderPlotly({
       disk_usage_plot(disk_usage_read(conn, data_type='inodes', 
                                       filesystem='abt3-projects',
+                                      project_sizes='project_sizes',
                                       time_val=2, units='days'), 
                       input)
     })

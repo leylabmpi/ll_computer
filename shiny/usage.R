@@ -23,10 +23,20 @@ disk_usage_read = function(conn, table='disk_usage', data_type='disk usage',
       dplyr::select(-time) %>%
       distinct(directory, .keep_all=TRUE) %>%
       rename('max_size_Tb' = terabytes) 
+    # joining
     df = df %>%
-        inner_join(df_sizes, c('directory')) %>%
-        mutate(perc_of_max = terabytes / max_size_Tb * 100) %>%
-        dplyr::select(-max_size_Tb)
+        inner_join(df_sizes, c('directory')) 
+    # perc of max limit
+    if(data_type == 'disk usage'){
+      df = df %>%
+        mutate(perc_of_max = terabytes / max_size_Tb * 100) 
+    } else 
+    if(data_type == 'inodes'){
+      df = df %>%
+        mutate(perc_of_max = million_files / inodes * 100)
+    }
+    df = df %>%
+      dplyr::select(-max_size_Tb, -inodes)
   } else {
     df = df %>%
       mutate(perc_of_max = NA)
@@ -49,7 +59,10 @@ disk_usage_plot = function(df, input){
                             unit == 'terabytes' ~ 'Terabytes',
                             unit == 'percent' ~ '% of total',
                             TRUE ~ unit), 
-           unit = factor(unit, levels=levs)) %>%
+           unit = factor(unit, levels=levs),
+           usage = round(usage, 1),
+           perc_of_max = round(perc_of_max, 1)) %>%
+    rename(`% of limit` = perc_of_max) %>%
     ggplot(aes(directory, usage)) +
     coord_flip() +
     facet_grid(. ~ unit, scales='free_x') +
@@ -62,8 +75,8 @@ disk_usage_plot = function(df, input){
   } else {
     cols = c('black', 'darkblue', 'purple', 'red', 'orange')
     p = p + 
-      geom_bar(stat='identity', aes(fill=perc_of_max)) +
-      scale_fill_gradientn('% of max', colors=cols)
+      geom_bar(stat='identity', aes(fill=`% of limit`)) +
+      scale_fill_gradientn('% of limit', colors=cols)
   }
   return(p)
 }

@@ -39,17 +39,30 @@ def clone_repo():
 def parse_proj_desc():
     cur_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     files = glob.glob(os.path.join('user-info', 'projects', 'abt3', '*'))
-    sizes = []
+    sizes = []    
     for F in files:
         basename = os.path.split(F)[1]
+        size = 0
+        inodes = 0
         with open(F) as inF:
             for line in inF:
                 if line.startswith('size:'):                    
                     size = line.split(' ')[-1].rstrip()
                     denom = 1000 if size.endswith('G') else 1
                     size = float(size.rstrip('TG')) / denom
-                    sizes.append([cur_time,basename,size])
-                    break
+                if line.startswith('inodes:'):
+                    inodes = line.split(' ')[-1].rstrip()
+                    multi = 1
+                    if inodes.endswith('K'):
+                        multi = 1e3
+                    elif inodes.endswith('M'):
+                        multi = 1e6
+                    elif inodes.endswith('G'):
+                        multi = 1e9
+                    inodes = int(inodes.rstrip('KMG')) * multi
+        if inodes < 1:
+            inodes = size * 1e6
+        sizes.append([cur_time,basename,size,inodes/1e3])        
     # clean up 
     if os.path.isdir('user-info'):
         shutil.rmtree('user-info')
@@ -67,7 +80,7 @@ def write_to_db(vals, db_c):
             logging.warning(msg.format(maxtries))
             break
         try:
-            db_c.executemany('INSERT INTO project_sizes VALUES (?,?,?)', vals)    
+            db_c.executemany('INSERT INTO project_sizes VALUES (?,?,?,?)', vals)    
             break
         except sqlite3.OperationalError:
             time.sleep(0.5)
