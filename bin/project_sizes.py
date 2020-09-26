@@ -30,7 +30,10 @@ def clone_repo():
         shutil.rmtree('user-info')
     cmd = 'git clone git://ilm.eb.local/user-info'
     try:
-        res = subprocess.run(cmd, check=True, shell=True, stdout=subprocess.PIPE)
+        with open(os.devnull, 'w') as DNULL:
+            res = subprocess.run(cmd, check=True, shell=True,
+                                 stdout=subprocess.PIPE,
+                                 stderr=DNULL)
     except subprocess.CalledProcessError as e:
         raise e
     if not os.path.isdir('user-info'):
