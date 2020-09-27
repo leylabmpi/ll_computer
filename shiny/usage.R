@@ -11,7 +11,9 @@ disk_usage_read = function(conn, table='disk_usage', data_type='disk usage',
       dplyr::select(-data_type, -filesystem) %>%
       mutate(time = sapply(time, format_time))
   if(data_type == 'inodes'){
-    df = df %>% rename('million_files' = terabytes)
+    df = df %>% 
+      rename('million_files' = terabytes) %>%
+      mutate(million_files = million_files / 1000)
   } else {
     df = df %>% mutate(terabytes = terabytes / 1000)   # wrong unit in the database
   }
@@ -33,7 +35,7 @@ disk_usage_read = function(conn, table='disk_usage', data_type='disk usage',
     } else 
     if(data_type == 'inodes'){
       df = df %>%
-        mutate(perc_of_max = million_files / inodes * 100)
+        mutate(perc_of_max = million_files / (inodes / 1000) * 100)
     }
     df = df %>%
       dplyr::select(-max_size_Tb, -inodes)
