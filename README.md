@@ -13,3 +13,15 @@ Ley Lab server admin tools
 
 * A set of python scripts in `./bin/` write info to the sqlite3 db
 * The shiny app in `./shiny/` plots the db data
+
+# Back-end database
+
+Type: sqlite3
+Location: /ebio/abt3_projects/databases_no-backup/ll_computer/ll_computer.db
+
+## Logging scripts
+
+* Location: ./bin/
+* Example: disk-usage.py
+
+

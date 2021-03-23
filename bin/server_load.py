@@ -73,7 +73,13 @@ def read_and_write(infile, label, db_file):
             continue
     
     # db connection close
-    conn.commit()
+    for i in range(5):
+        try:
+            conn.commit()
+            break
+        except sqlite3.OperationalError:
+            time.sleep(0.5)
+            pass
     conn.close()
     
 def main(args):

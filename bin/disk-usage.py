@@ -20,10 +20,10 @@ parser.add_argument('-d', '--db-file', metavar='db_file', type=str,
                     default='/ebio/abt3_projects/databases_no-backup/ll_computer/ll_computer.db',
                      help='sqlite3 database file (default: %(default)s)')
 parser.add_argument('-u', '--usage-files', type=str,
-                    default='/tmp/global/disk-usage,/tmp/global2/disk-usage,/ebio/abt3_projects/disk-usage,/ebio/abt3/disk-usage,/ebio/abt3_scratch/disk-usage',
+                    default='/tmp/global2/disk-usage,/ebio/abt3_projects/disk-usage,/ebio/abt3/disk-usage,/ebio/abt3_scratch/disk-usage',
                      help='comma delim list of path to disk-usage file(s) (default: %(default)s)')
 parser.add_argument('-l', '--label', type=str,
-                    default='tmp-global,tmp-global2,abt3-projects,abt3-home,abt3-scratch',
+                    default='tmp-global2,abt3-projects,abt3-home,abt3-scratch',
                     help='comma-delim list of label for file systems assessed (default: %(default)s)')
 parser.add_argument('-i', '--inodes', action='store_true', default=False,
                      help='Parse inodes instead of disk-usage (default: %(default)s)')
