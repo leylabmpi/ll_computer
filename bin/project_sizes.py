@@ -54,7 +54,7 @@ def parse_proj_desc():
                     denom = 1000 if size.endswith('G') else 1
                     size = float(size.rstrip('TG')) / denom
                 if line.startswith('inodes:'):
-                    inodes = line.split(' ')[-1].rstrip()
+                    inodes = line.split(' ')[-1].rstrip().upper()
                     multi = 1
                     if inodes.endswith('K'):
                         multi = 1e3
@@ -72,7 +72,8 @@ def parse_proj_desc():
     return sizes
     
 def write_to_db(vals, db_c):
-    """Writing to sqlite3 db
+    """
+    Writing to sqlite3 db
     """
     tries = 0
     maxtries = 3

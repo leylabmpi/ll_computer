@@ -14,8 +14,8 @@ ps_read = function(conn, table='ps', time_val=4, units='hours', host_name='rick'
       group_by(time, uname) %>%
       summarize(n_jobs = n(),
                 perc_cpu = sum(as.numeric(perc_cpu)),
-                perc_mem = sum(as.numeric(perc_mem))) %>%
-      ungroup()
+                perc_mem = sum(as.numeric(perc_mem)),
+                .groups='drop') 
   return(df)
 }
 

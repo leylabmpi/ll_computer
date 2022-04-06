@@ -15,8 +15,8 @@ qstat_read = function(conn, table='qstat', time_val=4, units='hours'){
     summarize(n_jobs = n(),
               io_usage = sum(as.Num(io_usage), na.rm=TRUE),
               cpu_usage = sum(as.Num(cpu_usage), na.rm=TRUE),
-              mem_usage = sum(as.Num(mem_usage), na.rm=TRUE)) %>%
-    ungroup()
+              mem_usage = sum(as.Num(mem_usage), na.rm=TRUE),
+              .groups='drop')
   return(df)
 }
 

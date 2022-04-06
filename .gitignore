@@ -2,7 +2,9 @@
 ._.DS_Store
 .Rproj.user
 packrat/
+packrat/lib*/
+renv/
+renv.lock
 .Rhistory
 .Rprofile
-packrat/lib*/
 tmp/
