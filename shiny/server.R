@@ -22,7 +22,7 @@ shinyServer(function(input, output, session){
   })
   
   # database connect
-  db_file = '/ebio/abt3_projects/databases_no-backup/ll_computer/ll_computer.db'
+  db_file = '/ebio/abt3_projects2/databases_no-backup/ll_computer/ll_computer.db'
   conn = dbConnect(RSQLite::SQLite(),
                    dbname = db_file)
   

@@ -17,7 +17,7 @@ Ley Lab server admin tools
 # Back-end database
 
 Type: sqlite3
-Location: /ebio/abt3_projects/databases_no-backup/ll_computer/ll_computer.db
+Location: /ebio/abt3_projects2/databases_no-backup/ll_computer/ll_computer.db
 
 ## Logging scripts
 

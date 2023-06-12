@@ -16,7 +16,7 @@ parser = argparse.ArgumentParser(description=desc,
                                  epilog=epi,
                                  formatter_class=argparse.RawTextHelpFormatter)
 parser.add_argument('-d', '--db-file', metavar='db_file', type=str,
-                    default='/ebio/abt3_projects/databases_no-backup/ll_computer/ll_computer.db',
+                    default='/ebio/abt3_projects2/databases_no-backup/ll_computer/ll_computer.db',
                      help='sqlite3 database file (default: %(default)s)')
 parser.add_argument('-i', '--in-files', type=str,
                     default='/ebio/abt3_projects/server-load,/ebio/abt3_scratch/server-load,/tmp/global2/server-load',

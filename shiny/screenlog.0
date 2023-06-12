@@ -1,0 +1,6 @@
+[32m[2023-06-07T14:47:52.599] [INFO] shiny-server - [39mShiny Server v1.5.9.923 (Node.js v8.11.3)
+[32m[2023-06-07T14:47:52.602] [INFO] shiny-server - [39mUsing config file "/etc/shiny-server/shiny-server.conf"
+[33m[2023-06-07T14:47:52.659] [WARN] shiny-server - [39mRunning as root unnecessarily is a security risk! You could be running more securely as non-root.
+[32m[2023-06-07T14:47:52.665] [INFO] shiny-server - [39mStarting listener on http://0.0.0.0:3838
+^C[32m[2023-06-07T14:54:54.691] [INFO] shiny-server - [39mStopping listener on http://0.0.0.0:3838
+[32m[2023-06-07T14:54:54.692] [INFO] shiny-server - [39mShutting down worker processes (with notification)
