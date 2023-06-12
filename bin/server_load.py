@@ -19,10 +19,10 @@ parser.add_argument('-d', '--db-file', metavar='db_file', type=str,
                     default='/ebio/abt3_projects2/databases_no-backup/ll_computer/ll_computer.db',
                      help='sqlite3 database file (default: %(default)s)')
 parser.add_argument('-i', '--in-files', type=str,
-                    default='/ebio/abt3_projects/server-load,/ebio/abt3_scratch/server-load',
+                    default='/ebio/abt3_projects/server-load,/ebio/abt3_scratch/server-load,/tmp/global2/server-load',
                      help='comma delim list of path to disk-usage file(s) (default: %(default)s)')
 parser.add_argument('-l', '--label', type=str,
-                    default='LUX,FOX',
+                    default='LUX,FOX,tmp-global2',
                     help='comma-delim list of label for file systems assessed (default: %(default)s)')
 parser.add_argument('--version', action='version', version='0.0.1')
 
