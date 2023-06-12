@@ -32,7 +32,7 @@ def list_tables(db_c):
     return [list(x)[0] for x in tables]
 
 def clean_db(table_id, db_c, time, units):
-    sql = "SELECT * FROM {table} WHERE time < DATETIME('now', 'localtime', '-{time} {units}')"
+    sql = "DELETE FROM {table} WHERE time < DATETIME('now', 'localtime', '-{time} {units}')"
     db_c.execute(sql.format(table=table_id, time=time, units=units))
 
 def main(args):
