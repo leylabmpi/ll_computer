@@ -70,7 +70,7 @@ shinyUI(
                                   #                      height='600px')),
                                   tabPanel('tmp-global2', 
                                            plotlyOutput("du_plot_tmp_global2",
-                                                        height='600px')),
+                                                        height='1000px')),
                                   tabPanel('abt3-home', 
                                            plotlyOutput("du_plot_abt3_home",
                                                         height='500px'))
@@ -94,7 +94,7 @@ shinyUI(
                                   #                      height='600px')),
                                   tabPanel('tmp-global2', 
                                            plotlyOutput("inodes_plot_tmp_global2",
-                                                        height='600px')),
+                                                        height='1000px')),
                                   tabPanel('abt3-home', 
                                            plotlyOutput("inodes_plot_abt3_home",
                                                         height='500px'))

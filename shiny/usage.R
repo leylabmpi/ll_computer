@@ -13,9 +13,10 @@ disk_usage_read = function(conn, table='disk_usage', data_type='disk usage',
   if(data_type == 'inodes'){
     df = df %>% 
       rename('million_files' = terabytes) %>%
-      mutate(million_files = million_files / 1000)
+      mutate(million_files = million_files / 1000.0)
+      #mutate(million_files = 0.23)
   } else {
-    df = df %>% mutate(terabytes = terabytes / 1000)   # wrong unit in the database
+    df = df %>% mutate(terabytes = terabytes / 1000.0)   # wrong unit in the database
   }
   # getting project sizes if not null
   if (!is.null(project_sizes)){
@@ -47,7 +48,7 @@ disk_usage_read = function(conn, table='disk_usage', data_type='disk usage',
 }
 
 disk_usage_plot = function(df, input){
-  levs = c('Millions of files', 'Terabytes', '% of total')
+  levs = c('Millions of files', 'Terabytes', '% of limit')
   if(nrow(df) < 1){
     return(NULL)
   }
@@ -59,11 +60,11 @@ disk_usage_plot = function(df, input){
     gather(unit, usage, -time, -directory, -perc_of_max) %>%
     mutate(unit = case_when(unit == 'million_files' ~ 'Millions of files',
                             unit == 'terabytes' ~ 'Terabytes',
-                            unit == 'percent' ~ '% of total',
+                            unit == 'percent' ~ '% of limit',
                             TRUE ~ unit), 
            unit = factor(unit, levels=levs),
-           usage = round(usage, 1),
-           perc_of_max = round(perc_of_max, 1)) %>%
+           usage = round(usage, 3),
+           perc_of_max = round(perc_of_max, 3)) %>%
     rename(`% of limit` = perc_of_max) %>%
     ggplot(aes(directory, usage)) +
     coord_flip() +
