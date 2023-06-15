@@ -3,10 +3,11 @@ ll_computer
 
 Ley Lab server admin tools
 
-* Version: 0.1.0
+* Version: 0.2.0
 * Authors:
   * Nick Youngblut <nyoungb2@gmail.com>
 * Maintainers:
+  * Alexander Tyakht <alexander.tyakht@tuebingen.mpg.de>
   * Nick Youngblut <nyoungb2@gmail.com>
 
 # Shiny app
